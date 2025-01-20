@@ -12,12 +12,16 @@ class CreatePostsTable extends Migration
      * @return void
      */
     public function up()
-    {
-        Schema::create('posts', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('posts', function (Blueprint $table) {
+        $table->id();
+        $table->string('title');
+        $table->text('content');
+        $table->string('status')->default('draft');
+        $table->foreignId('author_id')->constrained('users')->onDelete('cascade');
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

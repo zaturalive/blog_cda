@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        return Post::with('comments', 'user')->get();
     }
 
     /**
@@ -35,7 +35,14 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'author' => 'required|exists:users,id',
+            'content' => 'required|string',
+            'status' => 'required|string',
+        ]);
+
+        $post = Post::create($validated);
+        return response()->json($post, 201);
     }
 
     /**
@@ -44,9 +51,10 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($id)
     {
-        //
+        $post = Post::with('comments')->findOrFail($id);
+        return response()->json($post);
     }
 
     /**
@@ -67,9 +75,17 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'content' => 'sometimes|string',
+            'status' => 'sometimes|string',
+        ]);
+
+        $post = Post::findOrFail($id);
+        $post->update($validated);
+
+        return response()->json($post);
     }
 
     /**
@@ -78,8 +94,25 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function commenter(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'author' => 'required|exists:users,id',
+            'message' => 'required|string',
+            'status' => 'required|string',
+        ]);
+
+        $post = Post::findOrFail($id);
+        $comment = $post->comments()->create($validated);
+
+        return response()->json($comment, 201);
     }
 }

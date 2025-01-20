@@ -14,7 +14,7 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
+        return Comment::with('user', 'post')->get();
     }
 
     /**
@@ -35,7 +35,15 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'author' => 'required|exists:users,id',
+            'message' => 'required|string',
+            'status' => 'required|string',
+            'post_id' => 'required|exists:posts,id',
+        ]);
+
+        $comment = Comment::create($validated);
+        return response()->json($comment, 201);
     }
 
     /**
@@ -44,10 +52,12 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function show(Comment $comment)
+    public function show($id)
     {
-        //
+        $comment = Comment::with('user', 'post')->findOrFail($id);
+        return response()->json($comment);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -67,9 +77,17 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Comment $comment)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'message' => 'sometimes|string',
+            'status' => 'sometimes|string',
+        ]);
+
+        $comment = Comment::findOrFail($id);
+        $comment->update($validated);
+
+        return response()->json($comment);
     }
 
     /**
@@ -78,8 +96,11 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Comment $comment)
+    public function destroy($id)
     {
-        //
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+
+        return response()->json(null, 204);
     }
 }

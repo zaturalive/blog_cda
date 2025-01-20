@@ -23,6 +23,11 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
+// ROUTES A CLASSER AU BON ENDROIT
+Route::apiResource('posts', PostController::class);
+Route::apiResource('comments', CommentController::class);
+Route::post('posts/{post}/comment', [PostController::class, 'commenter']);
+
 // Routes pour les utilisateurs authentifiés
 Route::middleware('auth:sanctum')->group(function () {
     // Routes accessibles par le rôle 'user'
